@@ -39,13 +39,8 @@ command -v python3 >/dev/null 2>&1 || { print_error "Python 3 is not installed. 
 
 print_status "All prerequisites found!"
 echo ""
-
-# Create project root
-PROJECT_ROOT="intellirelief"
-print_info "Creating project structure in: $PROJECT_ROOT"
-
-mkdir -p $PROJECT_ROOT
-cd $PROJECT_ROOT
+PROJECT_ROOT="$(pwd)"
+print_info "Creating project structure in current directory: $PROJECT_ROOT"
 
 # Create directory structure
 print_info "Creating directories..."

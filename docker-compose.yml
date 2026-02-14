@@ -4,20 +4,20 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: intellirelief-postgres
+    container_name: intelli-relief-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-intellirelief}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-intellirelief_dev_2026}
-      POSTGRES_DB: ${POSTGRES_DB:-intellirelief_db}
+      POSTGRES_USER: ${POSTGRES_USER:-intelli_relief}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-intelli_relief_dev_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-intelli_relief_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - intellirelief-network
+      - intelli-relief-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intellirelief"]
+      test: ["CMD-SHELL", "pg_isready -U intelli_relief"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,13 +25,13 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: intellirelief-redis
+    container_name: intelli-relief-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - intellirelief-network
+      - intelli-relief-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -43,9 +43,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: intellirelief-backend
+    container_name: intelli-relief-backend
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-intellirelief}:${POSTGRES_PASSWORD:-intellirelief_dev_2026}@postgres:5432/${POSTGRES_DB:-intellirelief_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-intelli_relief}:${POSTGRES_PASSWORD:-intelli_relief_dev_2026}@postgres:5432/${POSTGRES_DB:-intelli_relief_db}
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
       ALGORITHM: HS256
@@ -65,7 +65,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - intellirelief-network
+      - intelli-relief-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   # Frontend (React + Vite)
@@ -74,7 +74,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
-    container_name: intellirelief-frontend
+    container_name: intelli-relief-frontend
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
       VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8000/ws}
@@ -88,13 +88,13 @@ services:
     depends_on:
       - backend
     networks:
-      - intellirelief-network
+      - intelli-relief-network
     command: npm run dev
 
   # Nginx Reverse Proxy (Production-like setup)
   nginx:
     image: nginx:alpine
-    container_name: intellirelief-nginx
+    container_name: intelli-relief-nginx
     ports:
       - "80:80"
     volumes:
@@ -104,7 +104,7 @@ services:
       - backend
       - frontend
     networks:
-      - intellirelief-network
+      - intelli-relief-network
 
 volumes:
   postgres_data:
@@ -113,5 +113,5 @@ volumes:
     driver: local
 
 networks:
-  intellirelief-network:
+  intelli-relief-network:
     driver: bridge
