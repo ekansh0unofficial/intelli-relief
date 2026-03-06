@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: intelli-relief-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-intelli_relief}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-intelli_relief_dev_2026}
-      POSTGRES_DB: ${POSTGRES_DB:-intelli_relief_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -17,7 +17,7 @@ services:
     networks:
       - intelli-relief-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelli_relief"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,14 +45,22 @@ services:
       dockerfile: Dockerfile
     container_name: intelli-relief-backend
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-intelli_relief}:${POSTGRES_PASSWORD:-intelli_relief_dev_2026}@postgres:5432/${POSTGRES_DB:-intelli_relief_db}
-      REDIS_URL: redis://redis:6379/0
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
-      ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 30
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      ENVIRONMENT: ${ENVIRONMENT}
+      DEBUG: ${DEBUG}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILE: ${LOG_FILE}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE}
+      MIN_PASSWORD_LENGTH: ${MIN_PASSWORD_LENGTH}
+      SESSION_TIMEOUT_MINUTES: ${SESSION_TIMEOUT_MINUTES}
+      SQL_ECHO: ${SQL_ECHO}
     ports:
       - "8000:8000"
     volumes:
@@ -76,9 +84,9 @@ services:
       target: development
     container_name: intelli-relief-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
-      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8000/ws}
-      VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
+      VITE_API_URL: ${VITE_API_URL}
+      VITE_WS_URL: ${VITE_WS_URL}
+      VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN}
     ports:
       - "5173:5173"
     volumes:
