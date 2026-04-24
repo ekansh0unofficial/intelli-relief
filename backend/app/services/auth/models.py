@@ -69,7 +69,7 @@ class User(Base):
     # Access Control
     # ================
     role: Mapped[UserRole] = mapped_column(
-        SQLEnum(UserRole, native_enum=False, create_type=False),
+        SQLEnum(UserRole, native_enum=False, create_type=False, values_callable=lambda obj: [e.value for e in obj]),
         nullable=False
     )
 
