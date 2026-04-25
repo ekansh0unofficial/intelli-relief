@@ -45,7 +45,9 @@ class Settings(BaseSettings):
     # ============================================
     # EXTERNAL APIs
     # ============================================
-    OPENWEATHER_API_KEY: str = ""
+    # AI / Speech (all open-source, no API keys)
+    WHISPER_MODEL: str = "tiny"   # tiny|base|small — trade-off: accuracy vs. RAM
+    NOMINATIM_USER_AGENT: str = "IntelliRelief/2.0 (disaster-management)"
 
     # ============================================
     # LOGGING

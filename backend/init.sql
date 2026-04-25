@@ -3,6 +3,8 @@
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable pgcrypto for bcrypt password hashing in seed data
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Enable PostGIS for geographic data (if needed)
 -- CREATE EXTENSION IF NOT EXISTS postgis;
@@ -82,7 +84,8 @@ CREATE TABLE alert_updates (
     update_text TEXT NOT NULL,
     status_before alert_status,
     status_after alert_status,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE INDEX idx_alert_updates_alert_id ON alert_updates(alert_id);
@@ -103,7 +106,9 @@ CREATE TABLE assignments (
     acknowledged_at TIMESTAMP,
     started_at TIMESTAMP,
     completed_at TIMESTAMP,
-    estimated_arrival TIMESTAMP
+    estimated_arrival TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE INDEX idx_assignments_alert_id ON assignments(alert_id);
@@ -219,6 +224,12 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
 CREATE TRIGGER update_alerts_updated_at BEFORE UPDATE ON alerts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_alert_updates_updated_at BEFORE UPDATE ON alert_updates
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_assignments_updated_at BEFORE UPDATE ON assignments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_shelters_updated_at BEFORE UPDATE ON shelters
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -231,11 +242,13 @@ CREATE TRIGGER update_volunteers_updated_at BEFORE UPDATE ON volunteers
 
 -- Create default admin user (password: admin123)
 -- Password hash generated with bcrypt
+-- Passwords hashed with bcrypt cost 10 via pgcrypto (compatible with passlib[bcrypt])
+-- Default password for all seed users: admin123
 INSERT INTO users (username, password_hash, full_name, email, phone, role)
-VALUES 
-    ('admin', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYWZ4XVRXpK', 'System Administrator', 'admin@intellirelief.com', '+919876543210', 'admin'),
-    ('operator1', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYWZ4XVRXpK', 'Operator One', 'operator1@intellirelief.com', '+919876543211', 'operator'),
-    ('responder1', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYWZ4XVRXpK', 'Responder One', 'responder1@intellirelief.com', '+919876543212', 'responder');
+VALUES
+    ('admin',      crypt('admin123', gen_salt('bf', 10)), 'System Administrator', 'admin@intellirelief.com',      '+919876543210', 'admin'),
+    ('operator1',  crypt('admin123', gen_salt('bf', 10)), 'Operator One',         'operator1@intellirelief.com',  '+919876543211', 'operator'),
+    ('responder1', crypt('admin123', gen_salt('bf', 10)), 'Responder One',        'responder1@intellirelief.com', '+919876543212', 'responder');
 
 -- Sample shelter
 INSERT INTO shelters (name, type, address, latitude, longitude, total_capacity, current_occupancy, facilities, contact_person, contact_phone, status, created_by)

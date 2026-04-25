@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliRelief - Disaster Management System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo-area">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h1>IntelliRelief</h1>
+                </div>
+                <p class="tagline">Unified Disaster Response Platform</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="operator">Operator</option>
+                        <option value="responder">Responder</option>
+                        <option value="volunteer">Volunteer</option>
+                        <option value="ngo">NGO Official</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary">Access System</button>
+                
+                <div class="demo-credentials">
+                    <p class="demo-title">Demo Credentials:</p>
+                    <div class="demo-grid">
+                        <div class="demo-item">
+                            <strong>Admin:</strong> admin / admin123
+                        </div>
+                        <div class="demo-item">
+                            <strong>Operator:</strong> operator / op123
+                        </div>
+                        <div class="demo-item">
+                            <strong>Responder:</strong> responder / resp123
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardScreen" class="screen">
+        <!-- Top Navigation Bar -->
+        <nav class="topbar">
+            <div class="topbar-left">
+                <div class="logo-compact">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>IntelliRelief</span>
+                </div>
+            </div>
+            
+            <div class="topbar-center">
+                <div class="weather-widget" id="weatherWidget">
+                    <div class="weather-loading">Loading weather...</div>
+                </div>
+            </div>
+            
+            <div class="topbar-right">
+                <div class="user-info">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-role" id="userRole">Role</span>
+                </div>
+                <button class="btn-icon" id="logoutBtn" title="Logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="nav-section">
+                    <button class="nav-item active" data-view="overview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>Overview</span>
+                    </button>
+                    
+                    <button class="nav-item" data-view="alerts">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span>Active Alerts</span>
+                        <span class="badge" id="alertCount">0</span>
+                    </button>
+                    
+                    <button class="nav-item" data-view="map">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                            <line x1="8" y1="2" x2="8" y2="18"/>
+                            <line x1="16" y1="6" x2="16" y2="22"/>
+                        </svg>
+                        <span>GIS Map</span>
+                    </button>
+                    
+                    <button class="nav-item admin-only" data-view="shelters">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        <span>Shelters</span>
+                    </button>
+                    
+                    <button class="nav-item admin-only" data-view="responders">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <span>Responders</span>
+                    </button>
+                    
+                    <button class="nav-item admin-only operator-only" data-view="users">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>Users</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Content Views -->
+            <main class="content-area">
+                <!-- Overview View -->
+                <div id="overviewView" class="view active">
+                    <div class="view-header">
+                        <h2>System Overview</h2>
+                        <div class="view-actions">
+                            <button class="btn-secondary" id="refreshDataBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10"/>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                </svg>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card urgent">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Active Alerts</div>
+                                <div class="stat-value" id="statActiveAlerts">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card warning">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">In Progress</div>
+                                <div class="stat-value" id="statInProgress">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Resolved Today</div>
+                                <div class="stat-value" id="statResolved">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card info">
+                            <div class="stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">Active Responders</div>
+                                <div class="stat-value" id="statResponders">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-content">
+                        <div class="recent-alerts">
+                            <h3>Recent Alerts</h3>
+                            <div id="recentAlertsList" class="alerts-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                        
+                        <div class="mini-map-container">
+                            <h3>Alert Distribution</h3>
+                            <div id="miniMap" class="mini-map"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts View -->
+                <div id="alertsView" class="view">
+                    <div class="view-header">
+                        <h2>Active Alerts</h2>
+                        <div class="view-actions">
+                            <button class="btn-primary operator-only admin-only" id="newAlertBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                New Alert
+                            </button>
+                            <select id="filterSeverity" class="filter-select">
+                                <option value="">All Severities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                            <select id="filterStatus" class="filter-select">
+                                <option value="">All Statuses</option>
+                                <option value="open">Open</option>
+                                <option value="assigned">Assigned</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="alertsListContainer" class="table-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Map View -->
+                <div id="mapView" class="view">
+                    <div class="view-header">
+                        <h2>GIS Visualization</h2>
+                        <div class="view-actions">
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <span class="legend-marker high"></span>
+                                    <span>High Severity</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-marker medium"></span>
+                                    <span>Medium</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-marker low"></span>
+                                    <span>Low</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-marker shelter"></span>
+                                    <span>Shelter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="mainMap" class="main-map"></div>
+                </div>
+
+                <!-- Shelters View -->
+                <div id="sheltersView" class="view">
+                    <div class="view-header">
+                        <h2>Shelter Management</h2>
+                        <div class="view-actions">
+                            <button class="btn-primary admin-only" id="newShelterBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add Shelter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="sheltersListContainer" class="table-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Responders View -->
+                <div id="respondersView" class="view">
+                    <div class="view-header">
+                        <h2>Responder Management</h2>
+                        <div class="view-actions">
+                            <button class="btn-primary admin-only" id="newResponderBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add Responder
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="respondersListContainer" class="table-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Users View -->
+                <div id="usersView" class="view">
+                    <div class="view-header">
+                        <h2>User Management</h2>
+                        <div class="view-actions">
+                            <button class="btn-primary admin-only" id="newUserBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="usersListContainer" class="table-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for Alert Details -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Alert Details</h3>
+                <button class="modal-close" id="closeAlertModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="alertModalBody">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Creating/Editing Alert -->
+    <div id="editAlertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="editModalTitle">New Alert</h3>
+                <button class="modal-close" id="closeEditAlertModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="alertForm">
+                    <input type="hidden" id="alertId">
+                    <div class="form-group">
+                        <label for="alertDescription">Description *</label>
+                        <textarea id="alertDescription" rows="4" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="alertLocation">Location *</label>
+                            <input type="text" id="alertLocation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="alertSeverity">Severity *</label>
+                            <select id="alertSeverity" required>
+                                <option value="">Select</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="alertLat">Latitude *</label>
+                            <input type="number" id="alertLat" step="0.000001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="alertLng">Longitude *</label>
+                            <input type="number" id="alertLng" step="0.000001" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="callerInfo">Caller Information</label>
+                        <input type="text" id="callerInfo">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" id="cancelAlertBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Alert</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Shelter Form -->
+    <div id="shelterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Shelter</h3>
+                <button class="modal-close" id="closeShelterModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="shelterForm">
+                    <div class="form-group">
+                        <label for="shelterName">Shelter Name *</label>
+                        <input type="text" id="shelterName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shelterLocation">Location *</label>
+                        <input type="text" id="shelterLocation" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shelterLat">Latitude *</label>
+                            <input type="number" id="shelterLat" step="0.000001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="shelterLng">Longitude *</label>
+                            <input type="number" id="shelterLng" step="0.000001" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shelterCapacity">Capacity *</label>
+                            <input type="number" id="shelterCapacity" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="shelterOccupancy">Current Occupancy</label>
+                            <input type="number" id="shelterOccupancy" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" id="cancelShelterBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">Add Shelter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

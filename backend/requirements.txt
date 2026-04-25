@@ -23,7 +23,7 @@ asyncpg==0.29.0
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
-bcrypt==4.1.2
+bcrypt==3.2.2
 
 # ============================================
 # REDIS & CACHING
@@ -73,8 +73,11 @@ mypy==1.8.0
 # ============================================
 # EXTERNAL INTEGRATIONS
 # ============================================
-# For weather API
+# requests kept for any non-async scripts; httpx is used for all async calls
 requests==2.31.0
+
+# For voice-to-text (local Whisper model, ~75 MB for 'tiny')
+faster-whisper>=1.0.1
 
 # For email notifications
 aiosmtplib==3.0.1

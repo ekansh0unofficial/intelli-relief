@@ -155,11 +155,16 @@ class Events:
     RESPONDER_ASSIGNED             = "responder.assigned"
     RESPONDER_AVAILABILITY_CHANGED = "responder.availability_changed"
 
+    # Alert automation
+    ALERT_ESCALATED              = "alert.escalated"    # auto-severity bump after stale timeout
+
     # Shelter
     SHELTER_CREATED          = "shelter.created"           # MIS.md: shelter.created
     SHELTER_UPDATED          = "shelter.updated"           # MIS.md: shelter.updated
     SHELTER_CAPACITY_CHANGED = "shelter.capacity_changed"  # MIS.md: shelter.capacity_changed
     SHELTER_FULL             = "shelter.full"
+    SHELTER_NEAR_FULL        = "shelter.near_full"
+    SHELTER_OCCUPANCY_UPDATED = "shelter.occupancy_updated"
 
     # Weather
     WEATHER_UPDATED         = "weather.updated"           # MIS.md: weather.updated

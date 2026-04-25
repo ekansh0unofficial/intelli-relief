@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs wc:*)",
+      "Bash(python -c ':*)",
+      "Bash(awk -F: '{print $3}')",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(grep -n \"Thunk\\\\.rejected\\\\|Thunk\\\\.pending\" *.ts)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(xargs grep *)",
+      "Bash(xargs ls *)"
+    ]
+  }
+}
